@@ -2,6 +2,7 @@ const express = require('express');
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
 require('dotenv').config();
+const ObjectId = require('mongodb').ObjectId;
 
 const app = express();
 const port = 4000;
@@ -28,12 +29,33 @@ async function run() {
       res.send(services);
     })
 
+    // GET single
+    app.get('/services/:id', async (req, res) => {
+      const id = req.params.id;
+      console.log("id ", id);
+      const query = {_id: ObjectId(id)};
+      console.log('query ', query);
+
+      const service = await servicesCollection.findOne(query);
+      res.json(service);
+    })
+
     // POST API
     app.post('/services', async (req, res) => {
       const newService = req.body;
 
       const result = await servicesCollection.insertOne(newService);
       console.log(result);
+      res.json(result);
+    });
+
+    // DELETE API
+    app.delete('/services/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: ObjectId(id)};
+
+      const result = await servicesCollection.deleteOne(query);
+
       res.json(result);
     })
   } finally {
